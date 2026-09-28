@@ -30,7 +30,7 @@ The technology list describes the intended architecture and may change as the pr
 │   ├── MarketPulse.Domain/
 │   ├── MarketPulse.Infrastructure/
 │   ├── MarketPulse.Worker/
-│   └── MarketPulse.Web/             # Angular application
+│   └── MarketPulse.Ui/             # Angular application
 ├── tests/
 │   ├── MarketPulse.UnitTests/
 │   └── MarketPulse.IntegrationTests/
