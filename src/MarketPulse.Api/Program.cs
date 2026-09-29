@@ -1,22 +1,34 @@
+using MarketPulse.Api.Endpoints;
+using MarketPulse.Api.Startup;
+using MarketPulse.Infrastructure;
+
+DotEnvLoader.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddIdentityAuthentication(builder.Configuration, builder.Environment);
+
 var app = builder.Build();
+
+app.EnsureGoogleAuthenticationConfigured();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarWithGoogleLogin();
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapAuthEndpoints();
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
