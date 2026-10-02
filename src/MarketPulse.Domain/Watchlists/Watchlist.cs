@@ -22,6 +22,8 @@ public sealed class Watchlist
     public DateTimeOffset CreatedAt { get; private set; }
     public IReadOnlyCollection<WatchlistInstrument> Instruments => _instruments;
 
+    public void Rename(string name) => Name = name;
+
     public void AddInstrument(Guid instrumentId, DateTimeOffset addedAt)
     {
         if (_instruments.Any(i => i.InstrumentId == instrumentId))

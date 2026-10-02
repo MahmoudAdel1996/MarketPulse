@@ -862,3 +862,6 @@ FodyWeavers.xsd
 .env.local
 *.env
 !.env.example
+
+##### Superpowers implementation plans (local only)
+docs/superpowers/plans/

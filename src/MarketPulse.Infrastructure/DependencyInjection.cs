@@ -1,4 +1,5 @@
 using MarketPulse.Application.Auth;
+using MarketPulse.Application.Common;
 using MarketPulse.Infrastructure.Identity;
 using MarketPulse.Infrastructure.Identity.External;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ public static class DependencyInjection
     {
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("Postgres")));
+        services.AddScoped<IApplicationDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, CurrentUser>();
