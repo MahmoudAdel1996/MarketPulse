@@ -1,10 +1,16 @@
+using System.ComponentModel.DataAnnotations;
 using MarketPulse.Application.Instruments;
 
 namespace MarketPulse.Application.Watchlists;
 
-public sealed record CreateWatchlistRequest(string Name);
+public static class WatchlistRules
+{
+    public const int MaxNameLength = 100;
+}
 
-public sealed record RenameWatchlistRequest(string Name);
+public sealed record CreateWatchlistRequest([Required, StringLength(WatchlistRules.MaxNameLength)] string Name);
+
+public sealed record RenameWatchlistRequest([Required, StringLength(WatchlistRules.MaxNameLength)] string Name);
 
 public sealed record AddWatchlistInstrumentRequest(Guid InstrumentId);
 

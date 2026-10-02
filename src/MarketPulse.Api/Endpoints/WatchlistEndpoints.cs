@@ -22,11 +22,10 @@ public static class WatchlistEndpoints
 
     private static async Task<IResult> ListWatchlists(
         WatchlistService service,
-        int page = PagedRequest.DefaultPage,
-        int pageSize = PagedRequest.DefaultPageSize,
+        [AsParameters] PagedRequest paging,
         CancellationToken cancellationToken = default)
     {
-        var result = await service.ListAsync(new PagedRequest(page, pageSize), cancellationToken);
+        var result = await service.ListAsync(paging, cancellationToken);
         return result.ToHttpResult();
     }
 

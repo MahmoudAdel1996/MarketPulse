@@ -23,12 +23,11 @@ public static class PriceAlertEndpoints
         PriceAlertService service,
         Guid? instrumentId,
         bool? isEnabled,
-        int page = PagedRequest.DefaultPage,
-        int pageSize = PagedRequest.DefaultPageSize,
+        [AsParameters] PagedRequest paging,
         CancellationToken cancellationToken = default)
     {
         var result = await service.ListAsync(
-            new PriceAlertQuery(instrumentId, isEnabled), new PagedRequest(page, pageSize), cancellationToken);
+            new PriceAlertQuery(instrumentId, isEnabled), paging, cancellationToken);
         return result.ToHttpResult();
     }
 

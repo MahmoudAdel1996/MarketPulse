@@ -3,6 +3,7 @@ using MarketPulse.Application.Alerts;
 using MarketPulse.Application.Common;
 using MarketPulse.Domain.Alerts;
 using MarketPulse.IntegrationTests.TestInfrastructure;
+using Microsoft.AspNetCore.Http;
 
 namespace MarketPulse.IntegrationTests.Market;
 
@@ -60,6 +61,21 @@ public class AlertEndpointsTests(PostgresApiFactory factory) : IClassFixture<Pos
     }
 
     [Fact]
+    public async Task Create_with_undefined_enum_values_returns_validation_problem()
+    {
+        var instrument = await factory.SeedInstrumentAsync();
+        using var client = await factory.CreateAuthenticatedClientAsync();
+
+        var response = await client.PostJsonAsync(
+            "/api/v1/alerts", new { instrumentId = instrument.Id, priceSide = 42, direction = 42, threshold = 1m });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var problem = await response.ReadJsonAsync<HttpValidationProblemDetails>();
+        Assert.Contains(problem.Errors.Keys, k => k.Contains("PriceSide", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(problem.Errors.Keys, k => k.Contains("Direction", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public async Task Create_for_unknown_instrument_returns_not_found()
     {
         using var client = await factory.CreateAuthenticatedClientAsync();
@@ -101,5 +117,21 @@ public class AlertEndpointsTests(PostgresApiFactory factory) : IClassFixture<Pos
         var intruderAlerts = await (await intruder.GetAsync("/api/v1/alerts"))
             .ReadJsonAsync<PagedResponse<PriceAlertResponse>>();
         Assert.Equal(0, intruderAlerts.TotalCount);
+    }
+
+    [Theory]
+    [InlineData("/api/v1/watchlists?page=0")]
+    [InlineData("/api/v1/watchlists?pageSize=101")]
+    [InlineData("/api/v1/alerts?pageSize=0")]
+    [InlineData("/api/v1/alert-events?page=-1")]
+    public async Task Authenticated_lists_reject_invalid_paging(string url)
+    {
+        using var client = await factory.CreateAuthenticatedClientAsync();
+
+        var response = await client.GetAsync(url);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var problem = await response.ReadJsonAsync<HttpValidationProblemDetails>();
+        Assert.NotEmpty(problem.Errors);
     }
 }

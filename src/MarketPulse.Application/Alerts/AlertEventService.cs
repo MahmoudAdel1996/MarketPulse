@@ -9,12 +9,6 @@ public sealed class AlertEventService(IApplicationDbContext db)
     public async Task<Result<PagedResponse<AlertEventResponse>>> ListAsync(
         AlertEventQuery query, PagedRequest paging, CancellationToken cancellationToken)
     {
-        var errors = paging.Validate();
-        if (errors.Count > 0)
-        {
-            return Result<PagedResponse<AlertEventResponse>>.Invalid(errors);
-        }
-
         var events = db.AlertEvents.AsNoTracking();
 
         if (query.AlertId is { } alertId)

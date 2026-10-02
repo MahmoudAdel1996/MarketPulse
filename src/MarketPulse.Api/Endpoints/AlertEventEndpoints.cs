@@ -20,12 +20,11 @@ public static class AlertEventEndpoints
         AlertEventService service,
         Guid? alertId,
         AlertEventStatus? status,
-        int page = PagedRequest.DefaultPage,
-        int pageSize = PagedRequest.DefaultPageSize,
+        [AsParameters] PagedRequest paging,
         CancellationToken cancellationToken = default)
     {
         var result = await service.ListAsync(
-            new AlertEventQuery(alertId, status), new PagedRequest(page, pageSize), cancellationToken);
+            new AlertEventQuery(alertId, status), paging, cancellationToken);
         return result.ToHttpResult();
     }
 

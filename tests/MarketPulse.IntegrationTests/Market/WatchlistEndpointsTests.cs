@@ -56,13 +56,31 @@ public class WatchlistEndpointsTests(PostgresApiFactory factory) : IClassFixture
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task Create_with_blank_name_returns_validation_problem(string name)
+    [InlineData(null)]
+    public async Task Create_with_blank_name_returns_validation_problem(string? name)
     {
         using var client = await factory.CreateAuthenticatedClientAsync();
 
-        var response = await client.PostJsonAsync("/api/v1/watchlists", new CreateWatchlistRequest(name));
+        var response = await client.PostJsonAsync("/api/v1/watchlists", new CreateWatchlistRequest(name!));
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Create_and_rename_reject_names_longer_than_max()
+    {
+        using var client = await factory.CreateAuthenticatedClientAsync();
+        var tooLong = new string('a', WatchlistRules.MaxNameLength + 1);
+
+        var create = await client.PostJsonAsync("/api/v1/watchlists", new CreateWatchlistRequest(tooLong));
+        Assert.Equal(HttpStatusCode.BadRequest, create.StatusCode);
+
+        var watchlist = await (await client.PostJsonAsync("/api/v1/watchlists", new CreateWatchlistRequest("W")))
+            .ReadJsonAsync<WatchlistResponse>();
+        var rename = await client.PutAsJsonAsync($"/api/v1/watchlists/{watchlist.Id}", new RenameWatchlistRequest(tooLong));
+        Assert.Equal(HttpStatusCode.BadRequest, rename.StatusCode);
+        var renameBlank = await client.PutAsJsonAsync($"/api/v1/watchlists/{watchlist.Id}", new RenameWatchlistRequest(" "));
+        Assert.Equal(HttpStatusCode.BadRequest, renameBlank.StatusCode);
     }
 
     [Fact]

@@ -1,10 +1,16 @@
+using System.ComponentModel.DataAnnotations;
+using MarketPulse.Application.Common;
 using MarketPulse.Domain.Alerts;
 
 namespace MarketPulse.Application.Alerts;
 
 public sealed record PriceAlertQuery(Guid? InstrumentId, bool? IsEnabled);
 
-public sealed record CreatePriceAlertRequest(Guid InstrumentId, PriceSide PriceSide, AlertDirection Direction, decimal Threshold);
+public sealed record CreatePriceAlertRequest(
+    Guid InstrumentId,
+    [EnumDataType(typeof(PriceSide))] PriceSide PriceSide,
+    [EnumDataType(typeof(AlertDirection))] AlertDirection Direction,
+    [GreaterThanZero] decimal Threshold);
 
 public sealed record PriceAlertResponse(
     Guid Id,

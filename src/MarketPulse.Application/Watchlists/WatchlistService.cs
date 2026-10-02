@@ -8,17 +8,9 @@ namespace MarketPulse.Application.Watchlists;
 
 public sealed class WatchlistService(IApplicationDbContext db, ICurrentUser currentUser, TimeProvider timeProvider)
 {
-    public const int MaxNameLength = 100;
-
     public async Task<Result<PagedResponse<WatchlistSummaryResponse>>> ListAsync(
         PagedRequest paging, CancellationToken cancellationToken)
     {
-        var errors = paging.Validate();
-        if (errors.Count > 0)
-        {
-            return Result<PagedResponse<WatchlistSummaryResponse>>.Invalid(errors);
-        }
-
         var page = await db.Watchlists
             .AsNoTracking()
             .OrderByDescending(w => w.CreatedAt)
@@ -45,12 +37,6 @@ public sealed class WatchlistService(IApplicationDbContext db, ICurrentUser curr
 
     public async Task<Result<WatchlistResponse>> CreateAsync(CreateWatchlistRequest request, CancellationToken cancellationToken)
     {
-        var errors = ValidateName(request.Name);
-        if (errors.Count > 0)
-        {
-            return Result<WatchlistResponse>.Invalid(errors);
-        }
-
         var userId = currentUser.UserId ?? throw new InvalidOperationException("An authenticated user is required.");
         var watchlist = new Watchlist(userId, request.Name.Trim(), timeProvider.GetUtcNow());
 
@@ -62,12 +48,6 @@ public sealed class WatchlistService(IApplicationDbContext db, ICurrentUser curr
 
     public async Task<Result> RenameAsync(Guid id, RenameWatchlistRequest request, CancellationToken cancellationToken)
     {
-        var errors = ValidateName(request.Name);
-        if (errors.Count > 0)
-        {
-            return Result.Invalid(errors);
-        }
-
         var watchlist = await db.Watchlists.SingleOrDefaultAsync(w => w.Id == id, cancellationToken);
         if (watchlist is null)
         {
@@ -130,22 +110,6 @@ public sealed class WatchlistService(IApplicationDbContext db, ICurrentUser curr
         await db.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
-    }
-
-    public static Dictionary<string, string[]> ValidateName(string? name)
-    {
-        var errors = new Dictionary<string, string[]>();
-        var trimmed = name?.Trim();
-        if (string.IsNullOrEmpty(trimmed))
-        {
-            errors["Name"] = ["Name is required."];
-        }
-        else if (trimmed.Length > MaxNameLength)
-        {
-            errors["Name"] = [$"Name must be at most {MaxNameLength} characters."];
-        }
-
-        return errors;
     }
 
     private async Task<WatchlistResponse> ToResponseAsync(Watchlist watchlist, CancellationToken cancellationToken)

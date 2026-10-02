@@ -20,12 +20,11 @@ public static class InstrumentEndpoints
         InstrumentService service,
         string? search,
         AssetClass? assetClass,
-        int page = PagedRequest.DefaultPage,
-        int pageSize = PagedRequest.DefaultPageSize,
+        [AsParameters] PagedRequest paging,
         CancellationToken cancellationToken = default)
     {
         var result = await service.ListAsync(
-            new InstrumentQuery(search, assetClass), new PagedRequest(page, pageSize), cancellationToken);
+            new InstrumentQuery(search, assetClass), paging, cancellationToken);
         return result.ToHttpResult();
     }
 

@@ -8,12 +8,6 @@ public sealed class InstrumentService(IApplicationDbContext db)
     public async Task<Result<PagedResponse<InstrumentResponse>>> ListAsync(
         InstrumentQuery query, PagedRequest paging, CancellationToken cancellationToken)
     {
-        var errors = paging.Validate();
-        if (errors.Count > 0)
-        {
-            return Result<PagedResponse<InstrumentResponse>>.Invalid(errors);
-        }
-
         var instruments = db.Instruments.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(query.Search))

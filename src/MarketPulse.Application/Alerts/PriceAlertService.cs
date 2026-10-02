@@ -10,12 +10,6 @@ public sealed class PriceAlertService(IApplicationDbContext db, ICurrentUser cur
     public async Task<Result<PagedResponse<PriceAlertResponse>>> ListAsync(
         PriceAlertQuery query, PagedRequest paging, CancellationToken cancellationToken)
     {
-        var errors = paging.Validate();
-        if (errors.Count > 0)
-        {
-            return Result<PagedResponse<PriceAlertResponse>>.Invalid(errors);
-        }
-
         var alerts = db.PriceAlerts.AsNoTracking();
 
         if (query.InstrumentId is { } instrumentId)
@@ -46,12 +40,6 @@ public sealed class PriceAlertService(IApplicationDbContext db, ICurrentUser cur
 
     public async Task<Result<PriceAlertResponse>> CreateAsync(CreatePriceAlertRequest request, CancellationToken cancellationToken)
     {
-        var errors = Validate(request);
-        if (errors.Count > 0)
-        {
-            return Result<PriceAlertResponse>.Invalid(errors);
-        }
-
         var symbol = await db.Instruments
             .Where(i => i.Id == request.InstrumentId)
             .Select(i => i.Symbol)
@@ -90,27 +78,6 @@ public sealed class PriceAlertService(IApplicationDbContext db, ICurrentUser cur
         await db.SaveChangesAsync(cancellationToken);
 
         return Result.Ok();
-    }
-
-    public static Dictionary<string, string[]> Validate(CreatePriceAlertRequest request)
-    {
-        var errors = new Dictionary<string, string[]>();
-        if (request.Threshold <= 0)
-        {
-            errors[nameof(request.Threshold)] = ["Threshold must be greater than 0."];
-        }
-
-        if (!Enum.IsDefined(request.PriceSide))
-        {
-            errors[nameof(request.PriceSide)] = ["PriceSide is not a supported value."];
-        }
-
-        if (!Enum.IsDefined(request.Direction))
-        {
-            errors[nameof(request.Direction)] = ["Direction is not a supported value."];
-        }
-
-        return errors;
     }
 
     private async Task<Result> UpdateAsync(Guid id, Action<PriceAlert> update, CancellationToken cancellationToken)
