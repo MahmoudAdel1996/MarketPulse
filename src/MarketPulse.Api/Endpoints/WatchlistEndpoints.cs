@@ -9,34 +9,64 @@ public static class WatchlistEndpoints
     {
         var group = app.MapGroup("/api/v1/watchlists").WithTags("Watchlists").RequireAuthorization();
 
-        group.MapGet("/", async (
-            WatchlistService service,
-            CancellationToken cancellationToken,
-            int page = PagedRequest.DefaultPage,
-            int pageSize = PagedRequest.DefaultPageSize) =>
-            (await service.ListAsync(new PagedRequest(page, pageSize), cancellationToken)).ToHttpResult());
-
-        group.MapGet("/{id:guid}", async (Guid id, WatchlistService service, CancellationToken cancellationToken) =>
-            (await service.GetAsync(id, cancellationToken)).ToHttpResult());
-
-        group.MapPost("/", async (CreateWatchlistRequest request, WatchlistService service, CancellationToken cancellationToken) =>
-            (await service.CreateAsync(request, cancellationToken)).ToCreatedResult(w => $"/api/v1/watchlists/{w.Id}"));
-
-        group.MapPut("/{id:guid}", async (
-            Guid id, RenameWatchlistRequest request, WatchlistService service, CancellationToken cancellationToken) =>
-            (await service.RenameAsync(id, request, cancellationToken)).ToHttpResult());
-
-        group.MapDelete("/{id:guid}", async (Guid id, WatchlistService service, CancellationToken cancellationToken) =>
-            (await service.DeleteAsync(id, cancellationToken)).ToHttpResult());
-
-        group.MapPost("/{id:guid}/instruments", async (
-            Guid id, AddWatchlistInstrumentRequest request, WatchlistService service, CancellationToken cancellationToken) =>
-            (await service.AddInstrumentAsync(id, request, cancellationToken)).ToHttpResult());
-
-        group.MapDelete("/{id:guid}/instruments/{instrumentId:guid}", async (
-            Guid id, Guid instrumentId, WatchlistService service, CancellationToken cancellationToken) =>
-            (await service.RemoveInstrumentAsync(id, instrumentId, cancellationToken)).ToHttpResult());
+        group.MapGet("/", ListWatchlists);
+        group.MapGet("/{id:guid}", GetWatchlist);
+        group.MapPost("/", CreateWatchlist);
+        group.MapPut("/{id:guid}", RenameWatchlist);
+        group.MapDelete("/{id:guid}", DeleteWatchlist);
+        group.MapPost("/{id:guid}/instruments", AddWatchlistInstrument);
+        group.MapDelete("/{id:guid}/instruments/{instrumentId:guid}", RemoveWatchlistInstrument);
 
         return group;
+    }
+
+    private static async Task<IResult> ListWatchlists(
+        WatchlistService service,
+        int page = PagedRequest.DefaultPage,
+        int pageSize = PagedRequest.DefaultPageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await service.ListAsync(new PagedRequest(page, pageSize), cancellationToken);
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> GetWatchlist(Guid id, WatchlistService service, CancellationToken cancellationToken = default)
+    {
+        var result = await service.GetAsync(id, cancellationToken);
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> CreateWatchlist(
+        CreateWatchlistRequest request, WatchlistService service, CancellationToken cancellationToken = default)
+    {
+        var result = await service.CreateAsync(request, cancellationToken);
+        return result.ToCreatedResult(w => $"/api/v1/watchlists/{w.Id}");
+    }
+
+    private static async Task<IResult> RenameWatchlist(
+        Guid id, RenameWatchlistRequest request, WatchlistService service, CancellationToken cancellationToken = default)
+    {
+        var result = await service.RenameAsync(id, request, cancellationToken);
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> DeleteWatchlist(Guid id, WatchlistService service, CancellationToken cancellationToken = default)
+    {
+        var result = await service.DeleteAsync(id, cancellationToken);
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> AddWatchlistInstrument(
+        Guid id, AddWatchlistInstrumentRequest request, WatchlistService service, CancellationToken cancellationToken = default)
+    {
+        var result = await service.AddInstrumentAsync(id, request, cancellationToken);
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> RemoveWatchlistInstrument(
+        Guid id, Guid instrumentId, WatchlistService service, CancellationToken cancellationToken = default)
+    {
+        var result = await service.RemoveInstrumentAsync(id, instrumentId, cancellationToken);
+        return result.ToHttpResult();
     }
 }

@@ -10,22 +10,28 @@ public static class InstrumentEndpoints
     {
         var group = app.MapGroup("/api/v1/instruments").WithTags("Instruments");
 
-        group.MapGet("/", async (
-            InstrumentService service,
-            CancellationToken cancellationToken,
-            string? search,
-            AssetClass? assetClass,
-            int page = PagedRequest.DefaultPage,
-            int pageSize = PagedRequest.DefaultPageSize) =>
-        {
-            var result = await service.ListAsync(
-                new InstrumentQuery(search, assetClass), new PagedRequest(page, pageSize), cancellationToken);
-            return result.ToHttpResult();
-        });
-
-        group.MapGet("/{id:guid}", async (Guid id, InstrumentService service, CancellationToken cancellationToken) =>
-            (await service.GetAsync(id, cancellationToken)).ToHttpResult());
+        group.MapGet("/", ListInstruments);
+        group.MapGet("/{id:guid}", GetInstrument);
 
         return group;
+    }
+
+    private static async Task<IResult> ListInstruments(
+        InstrumentService service,
+        string? search,
+        AssetClass? assetClass,
+        int page = PagedRequest.DefaultPage,
+        int pageSize = PagedRequest.DefaultPageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await service.ListAsync(
+            new InstrumentQuery(search, assetClass), new PagedRequest(page, pageSize), cancellationToken);
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> GetInstrument(Guid id, InstrumentService service, CancellationToken cancellationToken = default)
+    {
+        var result = await service.GetAsync(id, cancellationToken);
+        return result.ToHttpResult();
     }
 }

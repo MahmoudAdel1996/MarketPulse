@@ -10,22 +10,28 @@ public static class AlertEventEndpoints
     {
         var group = app.MapGroup("/api/v1/alert-events").WithTags("Alert events").RequireAuthorization();
 
-        group.MapGet("/", async (
-            AlertEventService service,
-            CancellationToken cancellationToken,
-            Guid? alertId,
-            AlertEventStatus? status,
-            int page = PagedRequest.DefaultPage,
-            int pageSize = PagedRequest.DefaultPageSize) =>
-        {
-            var result = await service.ListAsync(
-                new AlertEventQuery(alertId, status), new PagedRequest(page, pageSize), cancellationToken);
-            return result.ToHttpResult();
-        });
-
-        group.MapGet("/{id:guid}", async (Guid id, AlertEventService service, CancellationToken cancellationToken) =>
-            (await service.GetAsync(id, cancellationToken)).ToHttpResult());
+        group.MapGet("/", ListAlertEvents);
+        group.MapGet("/{id:guid}", GetAlertEvent);
 
         return group;
+    }
+
+    private static async Task<IResult> ListAlertEvents(
+        AlertEventService service,
+        Guid? alertId,
+        AlertEventStatus? status,
+        int page = PagedRequest.DefaultPage,
+        int pageSize = PagedRequest.DefaultPageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await service.ListAsync(
+            new AlertEventQuery(alertId, status), new PagedRequest(page, pageSize), cancellationToken);
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> GetAlertEvent(Guid id, AlertEventService service, CancellationToken cancellationToken = default)
+    {
+        var result = await service.GetAsync(id, cancellationToken);
+        return result.ToHttpResult();
     }
 }
