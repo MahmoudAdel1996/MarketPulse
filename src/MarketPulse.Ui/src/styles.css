@@ -1,3 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 
+@import '@angular/cdk/overlay-prebuilt.css';
 @import 'tailwindcss';
+
+.cdk-overlay-dark-backdrop {
+  background: rgb(15 23 42 / 0.5);
+}

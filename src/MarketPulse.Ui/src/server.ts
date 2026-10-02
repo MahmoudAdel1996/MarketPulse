@@ -5,24 +5,28 @@ import {
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
 import express from 'express';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 import { join } from 'node:path';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+const apiBaseUrl = process.env['API_BASE_URL'] ?? 'https://localhost:7274';
 
 /**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
+ * Forward API calls to MarketPulse.Api so cookies stay first-party.
  */
+app.use(
+  '/api',
+  createProxyMiddleware({
+    target: `${apiBaseUrl}/api`,
+    changeOrigin: false,
+    xfwd: true,
+    // Verify TLS by default; set API_INSECURE_TLS=true only for a local API using the dev certificate.
+    secure: process.env['API_INSECURE_TLS'] !== 'true',
+  }),
+);
 
 /**
  * Serve static files from /browser

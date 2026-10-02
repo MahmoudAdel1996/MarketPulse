@@ -863,7 +863,17 @@ FodyWeavers.xsd
 *.env
 !.env.example
 
-##### Superpowers implementation plans (local only)
-docs/superpowers/plans/
-/Plan.md
-/implementation-plan.md
+##### Implementation plans (local only, never committed)
+**/plans/
+[Pp]lan.md
+*-plan.md
+*.plan.md
+
+##### Design specs (local only, never committed)
+**/specs/
+*-design.md
+*.design.md
+[Dd]esign.md
+
+# Local superpowers scratch (brainstorm mockups, workspaces)
+.superpowers/

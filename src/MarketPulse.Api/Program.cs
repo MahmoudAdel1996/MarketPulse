@@ -3,6 +3,9 @@ using MarketPulse.Api.Endpoints;
 using MarketPulse.Api.Startup;
 using MarketPulse.Application;
 using MarketPulse.Infrastructure;
+using MarketPulse.Infrastructure.Identity;
+using MarketPulse.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 DotEnvLoader.Load();
 
@@ -21,6 +24,14 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddIdentityAuthentication(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await db.Database.MigrateAsync();
+    await DevelopmentSeeder.SeedAsync(db, TimeProvider.System);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

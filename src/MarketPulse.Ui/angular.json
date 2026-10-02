@@ -24,7 +24,9 @@
                 "input": "public"
               }
             ],
-            "styles": ["src/styles.css"],
+            "styles": [
+              "src/styles.css"
+            ],
             "server": "src/main.server.ts",
             "outputMode": "server",
             "security": {
@@ -68,7 +70,10 @@
               "buildTarget": "market-pulse-ui:build:development"
             }
           },
-          "defaultConfiguration": "development"
+          "defaultConfiguration": "development",
+          "options": {
+            "proxyConfig": "proxy.conf.json"
+          }
         },
         "test": {
           "builder": "@angular/build:unit-test"
