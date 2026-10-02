@@ -48,6 +48,24 @@ public class AuthEndpointsTests(PostgresApiFactory factory) : IClassFixture<Post
         Assert.Equal(HttpStatusCode.BadRequest, second.StatusCode);
     }
 
+    [Theory]
+    [InlineData("/api/v1/auth/register", "", "P@ssword123!", "Email")]
+    [InlineData("/api/v1/auth/register", "userexample.com", "P@ssword123!", "Email")]
+    [InlineData("/api/v1/auth/register", "user@example.com", "   ", "Password")]
+    [InlineData("/api/v1/auth/login", "", "P@ssword123!", "Email")]
+    [InlineData("/api/v1/auth/login", "userexample.com", "P@ssword123!", "Email")]
+    [InlineData("/api/v1/auth/login", "user@example.com", "", "Password")]
+    public async Task Invalid_request_returns_validation_problem(string url, string email, string password, string invalidField)
+    {
+        using var client = factory.CreateClient();
+
+        var response = await client.PostAsJsonAsync(url, new { email, password });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var body = await response.Content.ReadAsStringAsync();
+        Assert.Contains(invalidField, body);
+    }
+
     [Fact]
     public async Task Login_then_logout_clears_session()
     {

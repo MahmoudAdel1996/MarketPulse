@@ -9,13 +9,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddValidation();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddIdentityAuthentication(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
-
-app.EnsureGoogleAuthenticationConfigured();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

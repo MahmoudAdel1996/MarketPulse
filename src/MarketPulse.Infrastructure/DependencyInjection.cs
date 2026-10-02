@@ -1,5 +1,6 @@
 using MarketPulse.Application.Auth;
 using MarketPulse.Infrastructure.Identity;
+using MarketPulse.Infrastructure.Identity.External;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +16,7 @@ public static class DependencyInjection
 
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, CurrentUser>();
-        services.AddScoped<GoogleExternalLoginProvisioner>();
+        services.AddScoped<ExternalLoginProvisioner>();
 
         return services;
     }

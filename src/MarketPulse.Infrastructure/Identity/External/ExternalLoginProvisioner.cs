@@ -1,14 +1,13 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace MarketPulse.Infrastructure.Identity;
+namespace MarketPulse.Infrastructure.Identity.External;
 
 public sealed record ExternalLoginDetails(
     string Provider, string ProviderKey, string Email, string DisplayName, bool EmailVerified);
 
-public sealed class GoogleExternalLoginProvisioner(UserManager<ApplicationUser> userManager)
+public sealed class ExternalLoginProvisioner(UserManager<ApplicationUser> userManager)
 {
-    public async Task<ApplicationUser> ProvisionOrSignInAsync(
-        ExternalLoginDetails details, CancellationToken cancellationToken = default)
+    public async Task<ApplicationUser> ProvisionOrSignInAsync(ExternalLoginDetails details, CancellationToken ct = default)
     {
         var existingUser = await userManager.FindByLoginAsync(details.Provider, details.ProviderKey);
         if (existingUser is not null)
@@ -22,7 +21,7 @@ public sealed class GoogleExternalLoginProvisioner(UserManager<ApplicationUser> 
             if (!details.EmailVerified || !user.EmailConfirmed)
             {
                 throw new InvalidOperationException(
-                    "Cannot link Google account: an existing account with this email is not verified.");
+                    $"Cannot link {details.Provider} account: an existing account with this email is not verified.");
             }
         }
         else

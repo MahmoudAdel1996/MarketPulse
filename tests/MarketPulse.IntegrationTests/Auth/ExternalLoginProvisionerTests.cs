@@ -1,17 +1,18 @@
 using MarketPulse.IntegrationTests.TestInfrastructure;
 using MarketPulse.Infrastructure.Identity;
+using MarketPulse.Infrastructure.Identity.External;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace MarketPulse.IntegrationTests.Auth;
 
-public class GoogleExternalLoginProvisionerTests(PostgresApiFactory factory) : IClassFixture<PostgresApiFactory>
+public class ExternalLoginProvisionerTests(PostgresApiFactory factory) : IClassFixture<PostgresApiFactory>
 {
     [Fact]
     public async Task First_sign_in_provisions_new_user_and_links_login()
     {
         using var scope = factory.Services.CreateScope();
-        var provisioner = scope.ServiceProvider.GetRequiredService<GoogleExternalLoginProvisioner>();
+        var provisioner = scope.ServiceProvider.GetRequiredService<ExternalLoginProvisioner>();
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
         var email = $"google-{Guid.NewGuid():N}@example.com";
@@ -29,7 +30,7 @@ public class GoogleExternalLoginProvisionerTests(PostgresApiFactory factory) : I
     public async Task Second_sign_in_with_same_external_identity_reuses_user()
     {
         using var scope = factory.Services.CreateScope();
-        var provisioner = scope.ServiceProvider.GetRequiredService<GoogleExternalLoginProvisioner>();
+        var provisioner = scope.ServiceProvider.GetRequiredService<ExternalLoginProvisioner>();
 
         var email = $"google-{Guid.NewGuid():N}@example.com";
         var providerKey = $"google-key-{Guid.NewGuid():N}";

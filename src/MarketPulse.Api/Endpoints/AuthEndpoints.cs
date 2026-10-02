@@ -2,6 +2,7 @@ using System.Security.Claims;
 using MarketPulse.Api.Auth;
 using MarketPulse.Application.Auth;
 using MarketPulse.Infrastructure.Identity;
+using MarketPulse.Infrastructure.Identity.External;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
@@ -20,14 +21,6 @@ public static class AuthEndpoints
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager) =>
         {
-            if (!AuthRequestValidator.IsValid(request.Email, request.Password))
-            {
-                return Results.ValidationProblem(new Dictionary<string, string[]>
-                {
-                    ["Email"] = ["Email and password are required and Email must be a valid address."],
-                });
-            }
-
             var user = new ApplicationUser { UserName = request.Email, Email = request.Email };
             var result = await userManager.CreateAsync(user, request.Password);
             if (!result.Succeeded)
@@ -44,14 +37,6 @@ public static class AuthEndpoints
             LoginRequest request,
             SignInManager<ApplicationUser> signInManager) =>
         {
-            if (!AuthRequestValidator.IsValid(request.Email, request.Password))
-            {
-                return Results.ValidationProblem(new Dictionary<string, string[]>
-                {
-                    ["Email"] = ["Email and password are required and Email must be a valid address."],
-                });
-            }
-
             var result = await signInManager.PasswordSignInAsync(
                 request.Email, request.Password, isPersistent: false, lockoutOnFailure: false);
             return result.Succeeded ? Results.Ok() : Results.Unauthorized();
@@ -105,7 +90,7 @@ public static class AuthEndpoints
 
         group.MapGet("/google/callback", async (
             SignInManager<ApplicationUser> signInManager,
-            GoogleExternalLoginProvisioner provisioner,
+            ExternalLoginProvisioner provisioner,
             IConfiguration configuration,
             HttpContext httpContext) =>
         {

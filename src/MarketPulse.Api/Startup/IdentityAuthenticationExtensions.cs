@@ -52,21 +52,4 @@ public static class IdentityAuthenticationExtensions
 
         return services;
     }
-
-    /// <summary>
-    /// Fails fast at startup if Google OAuth credentials are missing, rather than
-    /// failing lazily on the first request that touches the Google auth handler.
-    /// </summary>
-    public static WebApplication EnsureGoogleAuthenticationConfigured(this WebApplication app)
-    {
-        var clientId = app.Configuration["Authentication:Google:ClientId"];
-        var clientSecret = app.Configuration["Authentication:Google:ClientSecret"];
-        if (string.IsNullOrWhiteSpace(clientId) || string.IsNullOrWhiteSpace(clientSecret))
-        {
-            throw new InvalidOperationException(
-                "Authentication:Google:ClientId and Authentication:Google:ClientSecret must both be configured.");
-        }
-
-        return app;
-    }
 }
