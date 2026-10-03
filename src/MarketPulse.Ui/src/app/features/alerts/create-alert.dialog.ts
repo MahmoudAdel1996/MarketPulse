@@ -19,7 +19,7 @@ export interface CreateAlertData {
   imports: [FormField, FieldErrors, FormAlert, InstrumentPicker],
   template: `
     <form
-      class="w-[28rem] max-w-full space-y-4 rounded-lg bg-white p-6 shadow-xl"
+      class="w-[28rem] max-w-full space-y-4 rounded-panel bg-surface p-6 text-ink shadow-pop"
       novalidate
       aria-labelledby="create-alert-title"
       (submit)="onSubmit($event)"
@@ -34,14 +34,14 @@ export interface CreateAlertData {
       <app-field-errors [field]="f.instrumentId" id="alert-instrument-errors" />
       <div>
         <label for="alert-side" class="block text-sm font-medium">Price side</label>
-        <select id="alert-side" class="mt-1 w-full rounded border px-3 py-2" [formField]="f.priceSide">
+        <select id="alert-side" class="mt-1 w-full rounded-card border border-line bg-surface px-3 py-2 text-ink" [formField]="f.priceSide">
           <option value="Bid">Bid</option>
           <option value="Ask">Ask</option>
         </select>
       </div>
       <div>
         <label for="alert-direction" class="block text-sm font-medium">Trigger when price goes</label>
-        <select id="alert-direction" class="mt-1 w-full rounded border px-3 py-2" [formField]="f.direction">
+        <select id="alert-direction" class="mt-1 w-full rounded-card border border-line bg-surface px-3 py-2 text-ink" [formField]="f.direction">
           <option value="Above">Above</option>
           <option value="Below">Below</option>
         </select>
@@ -52,7 +52,7 @@ export interface CreateAlertData {
           id="alert-threshold"
           type="number"
           step="any"
-          class="mt-1 w-full rounded border px-3 py-2"
+          class="mt-1 w-full rounded-card border border-line bg-surface px-3 py-2 text-ink"
           [formField]="f.threshold"
           aria-describedby="alert-threshold-errors"
           [attr.aria-invalid]="f.threshold().touched() && f.threshold().invalid()"
@@ -60,8 +60,8 @@ export interface CreateAlertData {
         <app-field-errors [field]="f.threshold" id="alert-threshold-errors" />
       </div>
       <div class="flex justify-end gap-2">
-        <button type="button" class="rounded border px-3 py-1" (click)="ref.close()">Cancel</button>
-        <button type="submit" class="rounded bg-blue-700 px-3 py-1 text-white disabled:opacity-60" [disabled]="f().submitting()">
+        <button type="button" class="rounded-pill border border-line px-3 py-1 text-ink" (click)="ref.close()">Cancel</button>
+        <button type="submit" class="rounded-pill bg-brand px-3 py-1 text-brand-ink disabled:opacity-60" [disabled]="f().submitting()">
           Create alert
         </button>
       </div>

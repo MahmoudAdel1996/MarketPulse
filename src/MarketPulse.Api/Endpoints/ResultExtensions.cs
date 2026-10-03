@@ -26,6 +26,7 @@ internal static class ResultExtensions
     {
         ResultStatus.NotFound => Results.NotFound(),
         ResultStatus.Invalid => Results.ValidationProblem(result.Errors),
+        ResultStatus.Unavailable => Results.Problem(statusCode: StatusCodes.Status503ServiceUnavailable, title: "Price history is temporarily unavailable."),
         _ => throw new InvalidOperationException($"Unexpected result status {result.Status}."),
     };
 }

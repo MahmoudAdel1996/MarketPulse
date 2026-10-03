@@ -35,4 +35,9 @@ describe('TopNav', () => {
     expect(el.textContent).toContain('me@x.io');
     await expectNoAxeViolations(el);
   });
+
+  it('includes the theme toggle', () => {
+    const el = setup(null);
+    expect(el.querySelector('app-theme-toggle button')?.getAttribute('aria-label')).toMatch(/^Theme: /);
+  });
 });

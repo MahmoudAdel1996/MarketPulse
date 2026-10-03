@@ -12,7 +12,7 @@ import { Instrument } from '../../features/instruments/models';
         type="text"
         role="combobox"
         autocomplete="off"
-        class="mt-1 w-full rounded border px-3 py-2"
+        class="mt-1 w-full rounded-card border border-line bg-surface px-3 py-2 text-ink"
         aria-autocomplete="list"
         [attr.aria-expanded]="open()"
         [attr.aria-controls]="inputId() + '-listbox'"
@@ -25,7 +25,7 @@ import { Instrument } from '../../features/instruments/models';
         [id]="inputId() + '-listbox'"
         role="listbox"
         [attr.aria-label]="label()"
-        class="absolute z-10 mt-1 w-full rounded border bg-white shadow"
+        class="absolute z-10 mt-1 w-full rounded border bg-surface shadow"
         [class.hidden]="!open()"
       >
         @for (item of options(); track item.id; let i = $index) {
@@ -33,7 +33,7 @@ import { Instrument } from '../../features/instruments/models';
             [id]="inputId() + '-option-' + i"
             role="option"
             class="cursor-pointer px-3 py-2"
-            [class.bg-blue-100]="i === active()"
+            [class.bg-surface-muted]="i === active()"
             [attr.aria-selected]="i === active()"
             (mousedown)="$event.preventDefault(); pick(item)"
           >

@@ -22,7 +22,7 @@ import { FormAlert } from '../../shared/ui/form-alert';
             id="email"
             type="email"
             autocomplete="email"
-            class="mt-1 w-full rounded border px-3 py-2"
+            class="mt-1 w-full rounded-card border border-line bg-surface px-3 py-2 text-ink"
             [formField]="f.email"
             aria-describedby="email-errors"
             [attr.aria-invalid]="f.email().touched() && f.email().invalid()"
@@ -35,21 +35,21 @@ import { FormAlert } from '../../shared/ui/form-alert';
             id="password"
             type="password"
             autocomplete="new-password"
-            class="mt-1 w-full rounded border px-3 py-2"
+            class="mt-1 w-full rounded-card border border-line bg-surface px-3 py-2 text-ink"
             [formField]="f.password"
             aria-describedby="password-errors"
             [attr.aria-invalid]="f.password().touched() && f.password().invalid()"
           />
           <app-field-errors [field]="f.password" id="password-errors" />
         </div>
-        <button type="submit" class="w-full rounded bg-blue-700 py-2 text-white disabled:opacity-60" [disabled]="f().submitting()">
+        <button type="submit" class="w-full rounded-pill bg-brand py-2 text-brand-ink disabled:opacity-60" [disabled]="f().submitting()">
           Create account
         </button>
       </form>
       <a class="mt-4 block w-full rounded border py-2 text-center" [href]="googleUrl()">Continue with Google</a>
       <p class="mt-4 text-sm">
         Already have an account?
-        <a routerLink="/login" [queryParams]="{ returnUrl: returnUrl() }" class="text-blue-700 underline">Sign in</a>
+        <a routerLink="/login" [queryParams]="{ returnUrl: returnUrl() }" class="text-brand underline">Sign in</a>
       </p>
     </section>
   `,

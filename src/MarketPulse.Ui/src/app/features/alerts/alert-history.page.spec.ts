@@ -32,6 +32,7 @@ describe('AlertHistoryPage', () => {
     await TestBed.inject(ApplicationRef).whenStable();
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('ol li')?.textContent).toContain('Notified');
     expect(el.querySelector('summary')?.textContent).toContain('1.50');
     expect(el.querySelector('details')?.textContent).toContain('Email');
     expect(el.querySelector('details')?.textContent).toContain('Sent');

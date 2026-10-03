@@ -29,6 +29,19 @@ app.use(
 );
 
 /**
+ * Google redirects back to this origin; the API's OAuth middleware owns the callback path.
+ */
+app.use(
+  createProxyMiddleware({
+    target: apiBaseUrl,
+    pathFilter: '/signin-google',
+    changeOrigin: false,
+    xfwd: true,
+    secure: process.env['API_INSECURE_TLS'] !== 'true',
+  }),
+);
+
+/**
  * Serve static files from /browser
  */
 app.use(

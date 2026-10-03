@@ -4,7 +4,7 @@ import { FieldTree } from '@angular/forms/signals';
 @Component({
   selector: 'app-field-errors',
   template: `
-    <div [id]="id()" class="mt-1 text-sm text-red-700">
+    <div [id]="id()" class="mt-1 text-sm text-down">
       @if (visible()) {
         @for (error of field()().errors(); track $index) {
           <p>{{ error.message ?? 'This field is invalid.' }}</p>

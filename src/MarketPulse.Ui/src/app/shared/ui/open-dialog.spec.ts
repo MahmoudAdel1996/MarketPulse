@@ -17,4 +17,10 @@ describe('openDialog', () => {
     expect((document.querySelector('#probe') as HTMLInputElement).value).toBe('bound');
     ref.close();
   });
+
+  it('opens as a themed sheet', () => {
+    const ref = openDialog(TestBed.inject(Dialog), ProbeDialog);
+    expect(document.querySelector('.cdk-overlay-pane')?.classList.contains('mp-dialog')).toBe(true);
+    ref.close();
+  });
 });

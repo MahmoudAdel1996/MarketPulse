@@ -6,7 +6,7 @@ import { RouterLink } from '@angular/router';
   template: `
     <div role="status" class="space-y-2">
       @for (row of [1, 2, 3]; track row) {
-        <div class="h-6 animate-pulse rounded bg-slate-200"></div>
+        <div class="h-6 animate-pulse rounded bg-surface-muted"></div>
       }
       <span class="sr-only">Loading…</span>
     </div>
@@ -17,7 +17,7 @@ export class LoadingState {}
 @Component({
   selector: 'app-empty-state',
   template: `
-    <div class="rounded border border-dashed border-slate-300 p-6 text-center text-slate-700">
+    <div class="rounded border border-dashed border-line p-6 text-center text-ink-muted">
       <p>{{ message() }}</p>
       <ng-content />
     </div>
@@ -30,9 +30,9 @@ export class EmptyState {
 @Component({
   selector: 'app-error-state',
   template: `
-    <div role="alert" class="rounded border border-red-300 bg-red-50 p-4 text-red-800">
+    <div role="alert" class="rounded border border-down bg-down-soft p-4 text-down">
       <p>We couldn't load this. Please try again.</p>
-      <button type="button" class="mt-2 rounded bg-red-700 px-3 py-1 text-white" (click)="retry.emit()">Retry</button>
+      <button type="button" class="mt-2 rounded-pill bg-down px-3 py-1 text-surface" (click)="retry.emit()">Retry</button>
     </div>
   `,
 })
@@ -45,8 +45,8 @@ export class ErrorState {
   imports: [RouterLink],
   template: `
     <h1 class="text-2xl font-semibold">Not found</h1>
-    <p class="mt-2 text-slate-700">This item doesn't exist or you don't have access to it.</p>
-    <a [routerLink]="backLink()" class="mt-4 inline-block text-blue-700 underline">{{ backLabel() }}</a>
+    <p class="mt-2 text-ink-muted">This item doesn't exist or you don't have access to it.</p>
+    <a [routerLink]="backLink()" class="mt-4 inline-block text-brand underline">{{ backLabel() }}</a>
   `,
 })
 export class NotFoundState {

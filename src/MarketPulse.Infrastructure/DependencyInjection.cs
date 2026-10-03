@@ -1,10 +1,13 @@
 using MarketPulse.Application.Auth;
 using MarketPulse.Application.Common;
+using MarketPulse.Application.Instruments;
+using MarketPulse.Infrastructure.History;
 using MarketPulse.Infrastructure.Identity;
 using MarketPulse.Infrastructure.Identity.External;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace MarketPulse.Infrastructure;
 
@@ -19,6 +22,19 @@ public static class DependencyInjection
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddScoped<ExternalLoginProvisioner>();
+
+        var influx = configuration.GetSection(InfluxDbOptions.SectionName).Get<InfluxDbOptions>() ?? new InfluxDbOptions();
+        if (influx.IsEnabled)
+        {
+            services.AddSingleton(influx);
+            services.AddSingleton<IPriceHistoryStore, InfluxPriceHistoryStore>();
+            services.AddHealthChecks().AddCheck<InfluxHealthCheck>("influxdb", failureStatus: HealthStatus.Degraded);
+        }
+        else
+        {
+            services.AddSingleton<IPriceHistoryStore, NullPriceHistoryStore>();
+            services.AddHealthChecks();
+        }
 
         return services;
     }

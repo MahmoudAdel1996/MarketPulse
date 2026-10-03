@@ -13,7 +13,8 @@ public sealed record InstrumentResponse(
     string Name,
     AssetClass AssetClass,
     string QuoteCurrency,
-    QuoteResponse? LatestQuote)
+    QuoteResponse? LatestQuote,
+    decimal? Change24h = null)
 {
     internal static readonly Expression<Func<Instrument, InstrumentResponse>> Projection = i => new InstrumentResponse(
         i.Id,
@@ -23,5 +24,10 @@ public sealed record InstrumentResponse(
         i.QuoteCurrency,
         i.LatestQuote == null
             ? null
-            : new QuoteResponse(i.LatestQuote.Bid, i.LatestQuote.Ask, i.LatestQuote.UpdatedAt, i.LatestQuote.Source, i.LatestQuote.Freshness));
+            : new QuoteResponse(i.LatestQuote.Bid, i.LatestQuote.Ask, i.LatestQuote.UpdatedAt, i.LatestQuote.Source, i.LatestQuote.Freshness),
+        null);
 }
+
+public sealed record HistoryPointResponse(DateTimeOffset T, decimal Bid, decimal Ask);
+
+public sealed record HistoryResponse(string Range, IReadOnlyList<HistoryPointResponse> Points);

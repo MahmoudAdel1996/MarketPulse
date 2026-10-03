@@ -1,7 +1,7 @@
 import { Service } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import { DEFAULT_PAGE_SIZE, PagedResponse, toHttpParams } from '../../core/api/paging';
-import { Instrument, InstrumentQuery } from './models';
+import { History, HistoryRangeValue, Instrument, InstrumentQuery } from './models';
 
 const BASE = '/api/v1/instruments';
 
@@ -29,6 +29,13 @@ export class InstrumentsApi {
     return httpResource<Instrument>(() => {
       const value = id();
       return value ? `${BASE}/${value}` : undefined;
+    });
+  }
+
+  history(id: () => string | undefined, range: () => HistoryRangeValue) {
+    return httpResource<History>(() => {
+      const value = id();
+      return value ? { url: `${BASE}/${value}/history`, params: { range: range() } } : undefined;
     });
   }
 }

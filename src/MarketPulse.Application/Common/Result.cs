@@ -5,6 +5,7 @@ public enum ResultStatus
     Ok,
     NotFound,
     Invalid,
+    Unavailable,
 }
 
 public class Result
@@ -26,6 +27,8 @@ public class Result
     public static Result NotFound() => new(ResultStatus.NotFound, null);
 
     public static Result Invalid(IReadOnlyDictionary<string, string[]> errors) => new(ResultStatus.Invalid, errors);
+
+    public static Result Unavailable() => new(ResultStatus.Unavailable, null);
 }
 
 public sealed class Result<T> : Result
@@ -43,4 +46,6 @@ public sealed class Result<T> : Result
     public static new Result<T> NotFound() => new(ResultStatus.NotFound, default, null);
 
     public static new Result<T> Invalid(IReadOnlyDictionary<string, string[]> errors) => new(ResultStatus.Invalid, default, errors);
+
+    public static new Result<T> Unavailable() => new(ResultStatus.Unavailable, default, null);
 }

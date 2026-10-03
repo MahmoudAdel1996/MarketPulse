@@ -1,8 +1,138 @@
-/* You can add global styles to this file, and also import other style files */
-
 @import '@angular/cdk/overlay-prebuilt.css';
+@import '@fontsource-variable/plus-jakarta-sans';
 @import 'tailwindcss';
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --radius-card: 1rem;
+  --radius-panel: 1.25rem;
+  --radius-pill: 999px;
+  --shadow-card: 0 6px 18px rgb(99 102 241 / 0.12);
+  --shadow-pop: 0 18px 40px rgb(30 27 75 / 0.25);
+  --color-canvas-from: var(--mp-canvas-from);
+  --color-canvas-to: var(--mp-canvas-to);
+  --color-surface: var(--mp-surface);
+  --color-surface-muted: var(--mp-surface-muted);
+  --color-line: var(--mp-line);
+  --color-ink: var(--mp-ink);
+  --color-ink-muted: var(--mp-ink-muted);
+  --color-brand: var(--mp-brand);
+  --color-brand-ink: var(--mp-brand-ink);
+  --color-accent: var(--mp-accent);
+  --color-up: var(--mp-up);
+  --color-down: var(--mp-down);
+  --color-up-soft: var(--mp-up-soft);
+  --color-down-soft: var(--mp-down-soft);
+  --color-warn-soft: var(--mp-warn-soft);
+  --color-warn-ink: var(--mp-warn-ink);
+}
+
+:root {
+  --mp-canvas-from: #eef2ff;
+  --mp-canvas-to: #fdf2f8;
+  --mp-surface: #ffffff;
+  --mp-surface-muted: #f5f3ff;
+  --mp-line: #e0e7ff;
+  --mp-ink: #1e1b4b;
+  --mp-ink-muted: #4b5563;
+  --mp-brand: #4f46e5;
+  --mp-brand-ink: #ffffff;
+  --mp-accent: #db2777;
+  --mp-up: #15803d;
+  --mp-down: #be123c;
+  --mp-up-soft: #dcfce7;
+  --mp-down-soft: #ffe4e6;
+  --mp-warn-soft: #fef3c7;
+  --mp-warn-ink: #92400e;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --mp-canvas-from: #0f0d24;
+  --mp-canvas-to: #1f0c1c;
+  --mp-surface: #17142f;
+  --mp-surface-muted: #221e40;
+  --mp-line: #2e2a52;
+  --mp-ink: #e0e7ff;
+  --mp-ink-muted: #a5b4cb;
+  --mp-brand: #a5b4fc;
+  --mp-brand-ink: #1e1b4b;
+  --mp-accent: #f9a8d4;
+  --mp-up: #4ade80;
+  --mp-down: #fb7185;
+  --mp-up-soft: #14532d66;
+  --mp-down-soft: #88133766;
+  --mp-warn-soft: #78350f66;
+  --mp-warn-ink: #fde68a;
+  color-scheme: dark;
+}
+
+body {
+  @apply min-h-dvh bg-linear-to-br from-canvas-from to-canvas-to bg-fixed font-sans text-ink antialiased;
+}
 
 .cdk-overlay-dark-backdrop {
   background: rgb(15 23 42 / 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+@keyframes flash-up {
+  from {
+    background-color: var(--mp-up-soft);
+  }
+}
+
+@keyframes flash-down {
+  from {
+    background-color: var(--mp-down-soft);
+  }
+}
+
+.flash-up {
+  animation: flash-up 600ms ease-out;
+}
+
+.flash-down {
+  animation: flash-down 600ms ease-out;
+}
+
+/* Dialogs: centred card on larger screens, bottom sheet on phones. */
+.mp-dialog .cdk-dialog-container > * {
+  display: block;
+  border-radius: var(--radius-panel);
+  background: var(--mp-surface);
+  color: var(--mp-ink);
+}
+
+@media (max-width: 639px) {
+  .cdk-global-overlay-wrapper:has(.mp-dialog) {
+    align-items: flex-end !important;
+  }
+
+  .mp-dialog {
+    width: 100vw;
+  }
+
+  .mp-dialog .cdk-dialog-container > *,
+  .mp-dialog .cdk-dialog-container > * > form {
+    width: 100% !important;
+    border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+  }
 }

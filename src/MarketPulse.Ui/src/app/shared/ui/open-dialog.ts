@@ -11,7 +11,7 @@ export function openDialog<R, D = unknown, C = unknown>(
   component: ComponentType<C>,
   config?: DialogConfig<D, DialogRef<R, C>>,
 ): DialogRef<R, C> {
-  const ref = dialog.open<R, D, C>(component, config);
+  const ref = dialog.open<R, D, C>(component, { panelClass: 'mp-dialog', maxWidth: '100vw', ...config });
   ref.componentRef?.changeDetectorRef.detectChanges();
   return ref;
 }

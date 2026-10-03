@@ -1,8 +1,17 @@
 import { Service, inject } from '@angular/core';
-import { HttpClient, httpResource } from '@angular/common/http';
+import { HttpClient, HttpContext, httpResource } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { DEFAULT_PAGE_SIZE, PagedResponse, toHttpParams } from '../../core/api/paging';
 import { MutationOutcome, runMutation } from '../../core/api/api-error';
+import { SKIP_ERROR_TOAST } from '../../core/http/error.interceptor';
+
+export interface MutationOptions {
+  /** The caller reports failures itself (no generic error toast). */
+  silent?: boolean;
+}
+
+export const mutationContext = (options?: MutationOptions) =>
+  new HttpContext().set(SKIP_ERROR_TOAST, options?.silent ?? false);
 import { Watchlist, WatchlistSummary } from './models';
 
 const BASE = '/api/v1/watchlists';
@@ -29,8 +38,8 @@ export class WatchlistsApi {
     return firstValueFrom(this.http.post<Watchlist>(BASE, { name }));
   }
 
-  rename(id: string, name: string): Promise<MutationOutcome> {
-    return runMutation(this.http.put(`${BASE}/${id}`, { name }));
+  rename(id: string, name: string, options?: MutationOptions): Promise<MutationOutcome> {
+    return runMutation(this.http.put(`${BASE}/${id}`, { name }, { context: mutationContext(options) }));
   }
 
   delete(id: string): Promise<MutationOutcome> {
@@ -41,7 +50,7 @@ export class WatchlistsApi {
     return runMutation(this.http.post(`${BASE}/${id}/instruments`, { instrumentId }));
   }
 
-  removeInstrument(id: string, instrumentId: string): Promise<MutationOutcome> {
-    return runMutation(this.http.delete(`${BASE}/${id}/instruments/${instrumentId}`));
+  removeInstrument(id: string, instrumentId: string, options?: MutationOptions): Promise<MutationOutcome> {
+    return runMutation(this.http.delete(`${BASE}/${id}/instruments/${instrumentId}`, { context: mutationContext(options) }));
   }
 }

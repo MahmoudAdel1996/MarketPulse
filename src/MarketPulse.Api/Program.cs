@@ -2,9 +2,11 @@ using System.Text.Json.Serialization;
 using MarketPulse.Api.Endpoints;
 using MarketPulse.Api.Startup;
 using MarketPulse.Application;
+using MarketPulse.Application.Instruments;
 using MarketPulse.Infrastructure;
 using MarketPulse.Infrastructure.Identity;
 using MarketPulse.Infrastructure.Persistence;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
 DotEnvLoader.Load();
@@ -31,6 +33,16 @@ if (app.Environment.IsDevelopment())
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await db.Database.MigrateAsync();
     await DevelopmentSeeder.SeedAsync(db, TimeProvider.System);
+    try
+    {
+        var history = scope.ServiceProvider.GetRequiredService<IPriceHistoryStore>();
+        await DevelopmentSeeder.SeedHistoryAsync(db, history, TimeProvider.System);
+    }
+    catch (Exception ex)
+    {
+        // History is optional; an unreachable InfluxDB must not stop the API.
+        app.Logger.LogWarning(ex, "Skipping price history seed: history store unavailable");
+    }
 }
 
 // Configure the HTTP request pipeline.
@@ -41,9 +53,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+// The UI proxies to the API, so honour its scheme (default trusts loopback proxies only).
+// Otherwise OAuth redirect URIs are built as https even when the UI is served over http.
+// Runs after UseHttpsRedirection, which must judge the real connection, not the browser's scheme.
+app.UseForwardedHeaders(new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedProto });
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHealthChecks("/health");
 app.MapAuthEndpoints();
 app.MapInstrumentEndpoints();
 app.MapWatchlistEndpoints();

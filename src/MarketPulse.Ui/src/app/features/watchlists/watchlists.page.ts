@@ -16,8 +16,8 @@ import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/states';
   imports: [RouterLink, DatePipe, Pager, EmptyState, ErrorState, LoadingState],
   template: `
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-semibold">Watchlists</h1>
-      <button type="button" class="rounded bg-blue-700 px-3 py-2 text-white" (click)="create()">New watchlist</button>
+      <h1 class="text-3xl font-extrabold">Watchlists</h1>
+      <button type="button" class="rounded-pill bg-brand px-4 py-2 font-semibold text-brand-ink" (click)="create()">New watchlist</button>
     </div>
     <div class="mt-6">
       @if (watchlists.error()) {
@@ -26,17 +26,17 @@ import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/states';
         @let page = watchlists.value();
         @if (page.items.length === 0) {
           <app-empty-state message="You have no watchlists yet.">
-            <button type="button" class="mt-3 rounded bg-blue-700 px-3 py-2 text-white" (click)="create()">
+            <button type="button" class="mt-3 rounded-pill bg-brand px-4 py-2 font-semibold text-brand-ink" (click)="create()">
               Create your first watchlist
             </button>
           </app-empty-state>
         } @else {
           <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             @for (item of page.items; track item.id) {
-              <li class="rounded-lg border p-4">
-                <a [routerLink]="['/watchlists', item.id]" class="text-lg font-medium text-blue-700 underline">{{ item.name }}</a>
-                <p class="mt-1 text-sm text-slate-700">{{ item.instrumentCount }} instruments</p>
-                <p class="text-sm text-slate-600">Created {{ item.createdAt | date: 'mediumDate' }}</p>
+              <li class="relative rounded-panel bg-surface p-5 shadow-card transition hover:-translate-y-0.5 hover:shadow-pop">
+                <a [routerLink]="['/watchlists', item.id]" class="text-lg font-bold text-ink after:absolute after:inset-0 after:rounded-panel focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-brand">{{ item.name }}</a>
+                <p class="mt-2 text-sm text-ink-muted">{{ item.instrumentCount }} instruments</p>
+                <p class="text-sm text-ink-muted">Created {{ item.createdAt | date: 'mediumDate' }}</p>
               </li>
             }
           </ul>

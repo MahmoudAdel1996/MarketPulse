@@ -13,16 +13,16 @@ export interface ConfirmOptions {
   selector: 'app-confirm-dialog',
   template: `
     <div
-      class="w-96 max-w-full rounded-lg bg-white p-6 shadow-xl"
+      class="w-96 max-w-full rounded-panel bg-surface p-6 text-ink shadow-pop"
       role="alertdialog"
       aria-labelledby="confirm-title"
       aria-describedby="confirm-message"
     >
       <h2 id="confirm-title" class="text-lg font-semibold">{{ data.title }}</h2>
-      <p id="confirm-message" class="mt-2 text-slate-700">{{ data.message }}</p>
+      <p id="confirm-message" class="mt-2 text-ink-muted">{{ data.message }}</p>
       <div class="mt-6 flex justify-end gap-2">
-        <button type="button" data-testid="cancel" class="rounded border px-3 py-1" (click)="ref.close(false)">Cancel</button>
-        <button type="button" data-testid="confirm" class="rounded bg-red-700 px-3 py-1 text-white" (click)="ref.close(true)">
+        <button type="button" data-testid="cancel" class="rounded-pill border border-line px-3 py-1 text-ink" (click)="ref.close(false)">Cancel</button>
+        <button type="button" data-testid="confirm" class="rounded-pill bg-down px-3 py-1 text-surface" (click)="ref.close(true)">
           {{ data.confirmLabel }}
         </button>
       </div>

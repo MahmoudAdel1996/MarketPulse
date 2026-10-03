@@ -57,7 +57,7 @@ describe('WatchlistDetailPage', () => {
   it('lists instruments and passes axe', async () => {
     const { el } = await setup();
     expect(el.querySelector('h1')?.textContent).toContain('FX');
-    expect(el.querySelector('tbody')?.textContent).toContain('EURUSD');
+    expect(el.querySelector('app-instrument-card')?.textContent).toContain('EURUSD');
     await expectNoAxeViolations(el);
   });
 
@@ -98,5 +98,61 @@ describe('WatchlistDetailPage', () => {
   it('shows not found for a missing watchlist', async () => {
     const { el } = await setup('nope', null, 404);
     expect(el.textContent).toContain('Not found');
+  });
+
+  const macrotask = () => new Promise((r) => setTimeout(r));
+  const messages = () => TestBed.inject(ToastStore).toasts().map((t) => t.message);
+
+  it('removes an instrument optimistically', async () => {
+    const { fixture, el, http } = await setup();
+    (el.querySelector('[data-testid="remove-i1"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(el.querySelector('app-instrument-card')).toBeNull();
+    http.expectOne({ method: 'DELETE', url: '/api/v1/watchlists/w1/instruments/i1' }).flush(null, { status: 204, statusText: 'x' });
+  });
+
+  it('rolls back a failed remove', async () => {
+    const { fixture, el, http } = await setup();
+    (el.querySelector('[data-testid="remove-i1"]') as HTMLButtonElement).click();
+    http.expectOne({ method: 'DELETE', url: '/api/v1/watchlists/w1/instruments/i1' }).flush(null, { status: 500, statusText: 'x' });
+    await macrotask();
+    fixture.detectChanges();
+    expect(el.querySelector('app-instrument-card')?.textContent).toContain('EURUSD');
+    expect(messages()).toContain("Couldn't remove EURUSD.");
+  });
+
+  it('renames optimistically and rolls back on failure', async () => {
+    const { fixture, el, http } = await setup();
+    (el.querySelector('[data-testid="rename-watchlist"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    const input = el.querySelector('#rename') as HTMLInputElement;
+    input.value = ' Majors ';
+    input.dispatchEvent(new Event('input'));
+    el.querySelector('form')!.dispatchEvent(new Event('submit'));
+    await macrotask();
+    fixture.detectChanges();
+    expect(el.querySelector('h1')?.textContent).toContain('Majors');
+
+    http.expectOne({ method: 'PUT', url: '/api/v1/watchlists/w1' }).flush(null, { status: 500, statusText: 'x' });
+    await macrotask();
+    fixture.detectChanges();
+    expect(el.querySelector('h1')?.textContent).toContain('FX');
+    expect(messages()).toContain("Couldn't rename the watchlist.");
+  });
+
+  it('does not let a background poll undo a pending optimistic change', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    try {
+      const { fixture, el, http } = await setup();
+      (el.querySelector('[data-testid="remove-i1"]') as HTMLButtonElement).click();
+      vi.advanceTimersByTime(15_000);
+      TestBed.tick();
+      http.expectNone('/api/v1/watchlists/w1');
+      fixture.detectChanges();
+      expect(el.querySelector('app-instrument-card')).toBeNull();
+      http.expectOne({ method: 'DELETE', url: '/api/v1/watchlists/w1/instruments/i1' }).flush(null, { status: 204, statusText: 'x' });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

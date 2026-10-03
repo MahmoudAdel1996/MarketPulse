@@ -2,6 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <script>
+    // Apply the saved theme before first paint so server-rendered pages never flash light.
+    (function () {
+      try {
+        var mode = localStorage.getItem('mp-theme');
+        var dark = mode === 'dark' || ((!mode || mode === 'system') && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      } catch (e) {}
+    })();
+  </script>
   <title>MarketPulse</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">

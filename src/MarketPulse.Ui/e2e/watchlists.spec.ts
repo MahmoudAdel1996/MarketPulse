@@ -11,7 +11,7 @@ test('register, create a watchlist and add an instrument', async ({ page }) => {
 
   await page.getByRole('combobox', { name: 'Add instrument' }).fill('XAU');
   await page.getByRole('option', { name: /XAUUSD/ }).click();
-  await expect(page.getByRole('cell', { name: 'XAUUSD', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'XAUUSD', exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: 'Remove XAUUSD' }).click();
   await expect(page.getByText('This watchlist is empty')).toBeVisible();

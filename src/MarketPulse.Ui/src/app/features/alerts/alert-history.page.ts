@@ -13,14 +13,14 @@ import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/states';
   imports: [RouterLink, DatePipe, PricePipe, Pager, EmptyState, ErrorState, LoadingState],
   template: `
     <div class="flex items-center gap-3">
-      <h1 class="text-2xl font-semibold">Alert history</h1>
-      <a routerLink="/alerts" class="text-blue-700 underline">Back to alerts</a>
+      <h1 class="text-3xl font-extrabold">Alert history</h1>
+      <a routerLink="/alerts" class="text-brand underline">Back to alerts</a>
     </div>
     <div class="mt-4">
       <label for="status-filter" class="mr-2 text-sm font-medium">Status</label>
       <select
         id="status-filter"
-        class="rounded border px-2 py-1"
+        class="rounded-pill border border-line bg-surface px-3 py-1 text-ink"
         [value]="status() ?? ''"
         (change)="navigate({ status: $any($event.target).value || null, page: null })"
       >
@@ -30,7 +30,7 @@ import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/states';
         }
       </select>
       @if (alertId()) {
-        <a routerLink="/alerts/history" class="ml-3 text-sm text-blue-700 underline">Clear alert filter</a>
+        <a routerLink="/alerts/history" class="ml-3 text-sm text-brand underline">Clear alert filter</a>
       }
     </div>
     <div class="mt-6">
@@ -41,9 +41,14 @@ import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/states';
         @if (page.items.length === 0) {
           <app-empty-state message="No alerts have triggered yet." />
         } @else {
-          <ul class="space-y-3">
+          <ol class="relative space-y-4 border-l-2 border-line pl-6">
             @for (event of page.items; track event.id) {
-              <li class="rounded border">
+              <li class="relative rounded-panel bg-surface shadow-card">
+                <span
+                  aria-hidden="true"
+                  class="absolute -left-[1.95rem] top-4 size-3 rounded-pill ring-4 ring-canvas-from"
+                  [class]="dotClass(event.status)"
+                ></span>
                 <details>
                   <summary class="cursor-pointer px-4 py-3">
                     {{ event.triggeredAt | date: 'medium' }} — observed {{ event.observedPrice | price }} — {{ event.status }}
@@ -76,7 +81,7 @@ import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/states';
                 </details>
               </li>
             }
-          </ul>
+          </ol>
           <app-pager [page]="page.page" [totalPages]="pages()" (pageChange)="navigate({ page: $event })" />
         }
       } @else {
@@ -99,6 +104,11 @@ export class AlertHistoryPage {
     page: this.page(),
   }));
   protected readonly pages = computed(() => (this.events.hasValue() ? totalPages(this.events.value()) : 1));
+
+  protected dotClass(status: AlertEventStatus): string {
+    const tone = status === 'Notified' ? 'bg-up' : status === 'Failed' ? 'bg-down' : 'bg-warn-ink';
+    return `absolute -left-[1.95rem] top-4 size-3 rounded-pill ring-4 ring-canvas-from ${tone}`;
+  }
 
   protected navigate(queryParams: Record<string, string | number | null>): void {
     void this.router.navigate([], { queryParams, queryParamsHandling: 'merge' });

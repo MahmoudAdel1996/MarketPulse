@@ -12,6 +12,7 @@ public static class InstrumentEndpoints
 
         group.MapGet("/", ListInstruments);
         group.MapGet("/{id:guid}", GetInstrument);
+        group.MapGet("/{id:guid}/history", GetInstrumentHistory);
 
         return group;
     }
@@ -31,6 +32,13 @@ public static class InstrumentEndpoints
     private static async Task<IResult> GetInstrument(Guid id, InstrumentService service, CancellationToken cancellationToken = default)
     {
         var result = await service.GetAsync(id, cancellationToken);
+        return result.ToHttpResult();
+    }
+
+    private static async Task<IResult> GetInstrumentHistory(
+        Guid id, string? range, InstrumentService service, CancellationToken cancellationToken = default)
+    {
+        var result = await service.GetHistoryAsync(id, range, cancellationToken);
         return result.ToHttpResult();
     }
 }

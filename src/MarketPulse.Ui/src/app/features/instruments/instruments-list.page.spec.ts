@@ -37,6 +37,7 @@ describe('InstrumentsListPage', () => {
         {
           id: '1', symbol: 'EURUSD', name: 'Euro', assetClass: 'Forex', quoteCurrency: 'USD',
           latestQuote: { bid: 1.07, ask: 1.0714, updatedAt: '2026-10-03T10:00:00Z', source: 'seed', freshness: 'Delayed' },
+          change24h: 0.5,
         },
       ],
       page: 2, pageSize: 20, totalCount: 21,
@@ -44,7 +45,10 @@ describe('InstrumentsListPage', () => {
     await TestBed.inject(ApplicationRef).whenStable();
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('tbody tr')?.textContent).toContain('EURUSD');
+    expect(el.querySelectorAll('app-instrument-card').length).toBe(1);
+    expect(el.querySelector('app-instrument-card')?.textContent).toContain('EURUSD');
+    expect(el.querySelector('h1')?.textContent).toContain('Markets');
+    expect(el.textContent).toContain('21 instruments');
     expect(el.textContent).toContain('Page 2 of 2');
     await expectNoAxeViolations(el);
   });
@@ -83,13 +87,13 @@ describe('InstrumentsListPage', () => {
     const { fixture, http } = setup({}, true);
     TestBed.tick();
     http.expectOne((r) => r.url === '/api/v1/instruments').flush({
-      items: [{ id: '1', symbol: 'EURUSD', name: 'Euro', assetClass: 'Forex', quoteCurrency: 'USD', latestQuote: null }],
+      items: [{ id: '1', symbol: 'EURUSD', name: 'Euro', assetClass: 'Forex', quoteCurrency: 'USD', latestQuote: null, change24h: null }],
       page: 1, pageSize: 20, totalCount: 1,
     });
     await TestBed.inject(ApplicationRef).whenStable();
     fixture.detectChanges();
     const el = fixture.nativeElement as HTMLElement;
-    expect(el.querySelector('tbody app-add-to-watchlist')).not.toBeNull();
+    expect(el.querySelector('app-instrument-card app-add-to-watchlist')).not.toBeNull();
     await expectNoAxeViolations(el);
   });
 

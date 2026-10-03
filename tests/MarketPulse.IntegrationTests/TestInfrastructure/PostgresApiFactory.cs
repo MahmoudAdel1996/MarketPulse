@@ -1,9 +1,12 @@
+using MarketPulse.Application.Instruments;
 using MarketPulse.Infrastructure.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Testcontainers.PostgreSql;
 
 namespace MarketPulse.IntegrationTests.TestInfrastructure;
@@ -17,6 +20,8 @@ public sealed class PostgresApiFactory : WebApplicationFactory<Program>, IAsyncL
         .WithPassword("marketpulse")
         .Build();
 
+    public FakePriceHistoryStore History { get; } = new();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureAppConfiguration((_, config) =>
@@ -27,6 +32,11 @@ public sealed class PostgresApiFactory : WebApplicationFactory<Program>, IAsyncL
                 ["Authentication:Google:ClientId"] = "test-client-id",
                 ["Authentication:Google:ClientSecret"] = "test-client-secret",
             });
+        });
+        builder.ConfigureTestServices(services =>
+        {
+            services.RemoveAll<IPriceHistoryStore>();
+            services.AddSingleton<IPriceHistoryStore>(History);
         });
     }
 

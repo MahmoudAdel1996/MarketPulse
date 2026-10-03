@@ -27,6 +27,12 @@ public static class IdentityAuthenticationExtensions
             options.ClientSecret = configuration["Authentication:Google:ClientSecret"] ?? "";
             options.SignInScheme = IdentityConstants.ExternalScheme;
             options.CallbackPath = "/signin-google";
+            // Google returns with a top-level GET, so Lax is enough. Its default (None + Secure) is dropped
+            // by browsers on http://localhost, which surfaces as "Correlation failed".
+            options.CorrelationCookie.SameSite = SameSiteMode.Lax;
+            options.CorrelationCookie.SecurePolicy = environment.IsDevelopment()
+                ? CookieSecurePolicy.SameAsRequest
+                : CookieSecurePolicy.Always;
         });
 
         services.ConfigureApplicationCookie(options =>

@@ -19,6 +19,7 @@ export interface Instrument {
   assetClass: AssetClass;
   quoteCurrency: string;
   latestQuote: Quote | null;
+  change24h: number | null;
 }
 
 export interface InstrumentQuery {
@@ -27,3 +28,19 @@ export interface InstrumentQuery {
   page: number;
   pageSize?: number;
 }
+
+export type HistoryRangeValue = '1h' | '24h' | '7d' | '30d';
+export const HISTORY_RANGES: readonly HistoryRangeValue[] = ['1h', '24h', '7d', '30d'];
+
+export interface HistoryPoint {
+  t: string;
+  bid: number;
+  ask: number;
+}
+
+export interface History {
+  range: HistoryRangeValue;
+  points: HistoryPoint[];
+}
+
+export const midPrice = (quote: Pick<Quote, 'bid' | 'ask'>) => Math.round(((quote.bid + quote.ask) / 2) * 1e8) / 1e8;

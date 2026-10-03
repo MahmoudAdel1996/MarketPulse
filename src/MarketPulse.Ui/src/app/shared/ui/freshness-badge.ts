@@ -3,9 +3,9 @@ import { Component, computed, input } from '@angular/core';
 export type QuoteFreshness = 'Live' | 'Delayed' | 'Stale';
 
 const STYLES: Record<QuoteFreshness, string> = {
-  Live: 'bg-green-100 text-green-800',
-  Delayed: 'bg-amber-100 text-amber-900',
-  Stale: 'bg-red-100 text-red-800',
+  Live: 'bg-up-soft text-up',
+  Delayed: 'bg-warn-soft text-warn-ink',
+  Stale: 'bg-down-soft text-down',
 };
 
 @Component({

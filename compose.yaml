@@ -16,5 +16,25 @@ services:
       timeout: 5s
       retries: 10
 
+  influxdb3:
+    image: influxdb:3-core
+    restart: unless-stopped
+    ports:
+      - "8181:8181"
+    environment:
+      # Same variable the API reads as InfluxDb:Token (InfluxDB 3 Core has tokens, not users/passwords).
+      INFLUXDB3_TOKEN: ${INFLUXDB__TOKEN:-}
+    entrypoint: ["sh", "-c"]
+    command:
+      - >-
+        [ -n "$$INFLUXDB3_TOKEN" ] || { echo "Set INFLUXDB__TOKEN in .env (see .env.example)" >&2; exit 1; };
+        printf '{"token":"%s","name":"_admin"}' "$$INFLUXDB3_TOKEN" > /tmp/admin-token.json &&
+        exec influxdb3 serve --node-id=marketpulse --object-store=file --data-dir=/var/lib/influxdb3/data --admin-token-file=/tmp/admin-token.json
+    volumes:
+      # Mount the image's own directory (owned by the non-root influxdb3 user) so the
+      # named volume inherits that ownership; mounting .../data directly makes it root-owned.
+      - influxdb3-data:/var/lib/influxdb3
+
 volumes:
   postgres-data:
+  influxdb3-data:

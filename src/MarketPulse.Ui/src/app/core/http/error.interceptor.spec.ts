@@ -4,7 +4,8 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { Router, provideRouter } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { vi } from 'vitest';
-import { errorInterceptor } from './error.interceptor';
+import { SKIP_ERROR_TOAST, errorInterceptor } from './error.interceptor';
+import { HttpContext } from '@angular/common/http';
 import { AuthStore } from '../auth/auth-store';
 import { ToastStore } from '../toast/toast-store';
 
@@ -55,6 +56,14 @@ describe('errorInterceptor', () => {
     await call('/api/v1/instruments', 500);
     await call('/api/v1/instruments', 0);
     await call('/api/v1/instruments/x', 404);
+    expect(toast).not.toHaveBeenCalled();
+  });
+
+  it('lets callers that handle their own failure skip the generic toast', async () => {
+    const toast = vi.spyOn(TestBed.inject(ToastStore), 'show');
+    const result = firstValueFrom(http.post('/api/v1/alerts/a1/disable', null, { context: new HttpContext().set(SKIP_ERROR_TOAST, true) })).catch((e) => e);
+    backend.expectOne('/api/v1/alerts/a1/disable').flush(null, { status: 500, statusText: 'x' });
+    await result;
     expect(toast).not.toHaveBeenCalled();
   });
 });

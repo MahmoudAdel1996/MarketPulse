@@ -1,4 +1,6 @@
+using MarketPulse.Application.Instruments;
 using MarketPulse.Domain.Instruments;
+using MarketPulse.Infrastructure.History;
 using MarketPulse.Infrastructure.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,4 +41,38 @@ public static class DevelopmentSeeder
 
         await db.SaveChangesAsync(ct);
     }
+
+    /// <summary>Writes 30 days of synthetic history for every instrument whose recent series is empty.</summary>
+    public static async Task SeedHistoryAsync(
+        ApplicationDbContext db, IPriceHistoryStore history, TimeProvider timeProvider, CancellationToken ct = default)
+    {
+        var instruments = await db.Instruments
+            .AsNoTracking()
+            .Include(i => i.LatestQuote)
+            .Where(i => i.LatestQuote != null)
+            .ToListAsync(ct);
+        var now = timeProvider.GetUtcNow();
+
+        foreach (var instrument in instruments)
+        {
+            if ((await history.GetSeriesAsync(instrument.Symbol, HistoryRange.OneDay, ct)).Count > 0)
+            {
+                continue;
+            }
+
+            var ticks = RandomWalk.Generate(
+                instrument.Symbol,
+                instrument.AssetClass.ToString(),
+                instrument.LatestQuote!.Bid,
+                instrument.LatestQuote.Ask,
+                now,
+                TimeSpan.FromDays(30),
+                TimeSpan.FromMinutes(5),
+                StableSeed(instrument.Symbol));
+            await history.WriteAsync(ticks, ct);
+        }
+    }
+
+    // string.GetHashCode is randomised per process; seeds must be stable across runs.
+    private static int StableSeed(string value) => value.Aggregate(17, (hash, c) => unchecked(hash * 31 + c));
 }

@@ -19,14 +19,14 @@ let nextId = 0;
       Add to watchlist<span class="sr-only"> ({{ instrument().symbol }})</span>
     </button>
     @if (open()) {
-      <div [id]="panelId" class="absolute right-0 z-10 mt-1 min-w-48 rounded border bg-white py-1 shadow-lg">
+      <div [id]="panelId" class="absolute right-0 z-10 mt-1 min-w-48 rounded border bg-surface py-1 shadow-pop">
         @if (watchlists.hasValue()) {
           <ul>
             @for (w of watchlists.value().items; track w.id) {
               <li>
                 <button
                   type="button"
-                  class="block w-full px-3 py-2 text-left hover:bg-slate-100"
+                  class="block w-full px-3 py-2 text-left hover:bg-surface-muted"
                   [attr.data-testid]="'add-to-' + w.id"
                   (click)="add(w)"
                 >
@@ -34,13 +34,13 @@ let nextId = 0;
                 </button>
               </li>
             } @empty {
-              <li class="px-3 py-2 text-sm text-slate-600">No watchlists yet.</li>
+              <li class="px-3 py-2 text-sm text-ink-muted">No watchlists yet.</li>
             }
           </ul>
         } @else if (watchlists.error()) {
-          <p class="px-3 py-2 text-sm text-red-700">Couldn't load watchlists.</p>
+          <p class="px-3 py-2 text-sm text-down">Couldn't load watchlists.</p>
         } @else {
-          <p class="px-3 py-2 text-sm text-slate-600" role="status">Loading…</p>
+          <p class="px-3 py-2 text-sm text-ink-muted" role="status">Loading…</p>
         }
       </div>
     }

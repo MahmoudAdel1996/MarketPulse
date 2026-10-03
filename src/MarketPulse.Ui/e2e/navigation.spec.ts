@@ -19,5 +19,15 @@ test('instrument pages render on the server through the /api proxy', async ({ re
 
 test('tiny crypto prices keep their precision', async ({ page }) => {
   await page.goto('/instruments?search=SHIB');
-  await expect(page.getByRole('cell', { name: '0.00001734' })).toBeVisible();
+  await expect(page.getByText('Bid 0.00001734')).toBeVisible();
+});
+
+test.describe('with reduced motion', () => {
+  test.use({ reducedMotion: 'reduce' });
+
+  test('card → detail navigation works without animations', async ({ page }) => {
+    await page.goto('/instruments?search=XAU');
+    await page.getByRole('link', { name: 'XAUUSD' }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('XAUUSD');
+  });
 });

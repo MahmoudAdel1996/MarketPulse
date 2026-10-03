@@ -58,3 +58,23 @@ MarketPulse.Api uses ASP.NET Core Identity with cookie sessions, backed by Postg
    `MarketPulse.Api` loads `.env` automatically on startup (searching upward from the current directory) and sets it as process environment variables, which ASP.NET Core's configuration system reads the same way it reads real environment variables (`AUTHENTICATION__GOOGLE__CLIENTID` → `Authentication:Google:ClientId`). Real environment variables always take precedence over `.env`.
 
 5. `Auth:AllowedReturnUrls` in `appsettings.Development.json` lists the origins the Google sign-in flow is allowed to redirect back to after login (defaults to the Angular dev server at `http://localhost:4200`).
+
+## Price history (InfluxDB 3 Core)
+
+Quote history (24h change, sparklines, charts) is stored in InfluxDB 3 Core. It is optional: without it the app runs normally and simply shows no history.
+
+InfluxDB 3 Core has **no username/password** — a token is the credential. It lives in `.env` next to the Postgres settings:
+
+1. Add a token to `.env` (see `.env.example`):
+   ```bash
+   echo "INFLUXDB__TOKEN=apiv3_$(openssl rand -base64 32 | tr -d '=+/')" >> .env
+   ```
+   The `influxdb3` container starts with it as its admin token, and the API reads it as `InfluxDb:Token`.
+2. Start InfluxDB and create the database (retention can only be set at creation):
+   ```bash
+   docker compose up -d influxdb3
+   docker compose exec influxdb3 sh -c 'influxdb3 create database marketpulse --retention-period 30d --token "$INFLUXDB3_TOKEN"'
+   ```
+3. Connect to it with host `http://localhost:8181`, database `marketpulse` and the token (no username).
+
+When the API starts in Development it seeds 30 days of synthetic history for the sample instruments.

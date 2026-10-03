@@ -3,6 +3,7 @@ import { HttpClient, httpResource } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { DEFAULT_PAGE_SIZE, PagedResponse, toHttpParams } from '../../core/api/paging';
 import { MutationOutcome, runMutation } from '../../core/api/api-error';
+import { MutationOptions, mutationContext } from '../watchlists/watchlists-api';
 import { AlertEvent, AlertEventQuery, CreatePriceAlert, PriceAlert, PriceAlertQuery } from './models';
 
 @Service()
@@ -23,8 +24,10 @@ export class AlertsApi {
     return firstValueFrom(this.http.post<PriceAlert>('/api/v1/alerts', body));
   }
 
-  setEnabled(id: string, enabled: boolean): Promise<MutationOutcome> {
-    return runMutation(this.http.post(`/api/v1/alerts/${id}/${enabled ? 'enable' : 'disable'}`, null));
+  setEnabled(id: string, enabled: boolean, options?: MutationOptions): Promise<MutationOutcome> {
+    return runMutation(
+      this.http.post(`/api/v1/alerts/${id}/${enabled ? 'enable' : 'disable'}`, null, { context: mutationContext(options) }),
+    );
   }
 
   delete(id: string): Promise<MutationOutcome> {

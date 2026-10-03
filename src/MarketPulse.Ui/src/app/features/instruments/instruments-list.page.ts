@@ -1,47 +1,49 @@
-import { Component, DestroyRef, computed, inject, input, linkedSignal, numberAttribute } from '@angular/core';
-import { DatePipe } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Component, DestroyRef, computed, inject, input, linkedSignal, numberAttribute, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { Dialog } from '@angular/cdk/dialog';
 import { InstrumentsApi } from './instruments-api';
-import { ASSET_CLASSES, AssetClass } from './models';
+import { InstrumentCard } from './instrument-card';
+import { ASSET_CLASSES, AssetClass, Instrument } from './models';
 import { pollWhileVisible } from '../../core/api/poll';
 import { totalPages } from '../../core/api/paging';
 import { AuthStore } from '../../core/auth/auth-store';
-import { PricePipe } from '../../shared/format/price.pipe';
-import { FreshnessBadge } from '../../shared/ui/freshness-badge';
+import { ToastStore } from '../../core/toast/toast-store';
+import { relativeTime } from '../../shared/format/relative-time';
 import { Pager } from '../../shared/ui/pager';
 import { EmptyState, ErrorState, LoadingState } from '../../shared/ui/states';
-import { AddToWatchlist } from '../watchlists/add-to-watchlist';
-import { Dialog } from '@angular/cdk/dialog';
 import { openCreateAlert } from '../alerts/open-create-alert';
-import { ToastStore } from '../../core/toast/toast-store';
-import { Instrument } from './models';
 
 @Component({
   selector: 'app-instruments-list-page',
-  imports: [RouterLink, DatePipe, PricePipe, FreshnessBadge, Pager, EmptyState, ErrorState, LoadingState, AddToWatchlist],
+  imports: [InstrumentCard, Pager, EmptyState, ErrorState, LoadingState],
   template: `
-    <h1 class="text-2xl font-semibold">Instruments</h1>
-    <div class="mt-4 flex flex-wrap items-end gap-4">
+    <div class="flex flex-wrap items-end justify-between gap-4">
       <div>
-        <label for="instrument-search" class="block text-sm font-medium">Search</label>
+        <h1 class="text-3xl font-extrabold">Markets</h1>
+        @if (instruments.hasValue()) {
+          <p class="text-sm text-ink-muted">{{ instruments.value().totalCount }} instruments · updated {{ updatedText() }}</p>
+        }
+      </div>
+      <div>
+        <label for="instrument-search" class="sr-only">Search instruments</label>
         <input
           id="instrument-search"
           type="search"
-          class="mt-1 rounded border px-3 py-2"
+          placeholder="Search symbol or name"
+          class="w-64 rounded-pill border border-line bg-surface px-4 py-2 text-ink shadow-card placeholder:text-ink-muted"
           [value]="searchText()"
           (input)="onSearch($any($event.target).value)"
         />
       </div>
-      <div role="group" aria-label="Asset class" class="flex flex-wrap gap-2">
-        <button type="button" class="rounded-full border px-3 py-1" [attr.aria-pressed]="!assetClass()" (click)="setAssetClass(null)">
-          All
+    </div>
+
+    <div role="group" aria-label="Asset class" class="mt-4 flex flex-wrap gap-2">
+      <button type="button" [class]="chipClass(!assetClass())" [attr.aria-pressed]="!assetClass()" (click)="setAssetClass(null)">All</button>
+      @for (cls of assetClasses; track cls) {
+        <button type="button" [class]="chipClass(assetClass() === cls)" [attr.aria-pressed]="assetClass() === cls" (click)="setAssetClass(cls)">
+          {{ cls }}
         </button>
-        @for (cls of assetClasses; track cls) {
-          <button type="button" class="rounded-full border px-3 py-1" [attr.aria-pressed]="assetClass() === cls" (click)="setAssetClass(cls)">
-            {{ cls }}
-          </button>
-        }
-      </div>
+      }
     </div>
 
     <div class="mt-6">
@@ -52,50 +54,13 @@ import { Instrument } from './models';
         @if (page.items.length === 0) {
           <app-empty-state message="No instruments match your filters." />
         } @else {
-          <table class="w-full text-left text-sm">
-            <caption class="sr-only">Instruments and latest quotes</caption>
-            <thead>
-              <tr class="border-b">
-                <th scope="col" class="py-2">Symbol</th>
-                <th scope="col">Name</th>
-                <th scope="col">Class</th>
-                <th scope="col" class="text-right">Bid</th>
-                <th scope="col" class="text-right">Ask</th>
-                <th scope="col">Updated</th>
-                <th scope="col">Freshness</th>
-                @if (auth.isAuthenticated()) {
-                  <th scope="col"><span class="sr-only">Actions</span></th>
-                }
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of page.items; track item.id) {
-                <tr class="border-b">
-                  <td class="py-2">
-                    <a [routerLink]="['/instruments', item.id]" class="font-medium text-blue-700 underline">{{ item.symbol }}</a>
-                  </td>
-                  <td>{{ item.name }}</td>
-                  <td>{{ item.assetClass }}</td>
-                  <td class="text-right tabular-nums">{{ item.latestQuote?.bid | price }}</td>
-                  <td class="text-right tabular-nums">{{ item.latestQuote?.ask | price }}</td>
-                  <td>{{ item.latestQuote ? (item.latestQuote.updatedAt | date: 'short') : '—' }}</td>
-                  <td>
-                    @if (item.latestQuote; as q) {
-                      <app-freshness-badge [freshness]="q.freshness" />
-                    } @else {
-                      No quote
-                    }
-                  </td>
-                  @if (auth.isAuthenticated()) {
-                    <td class="flex justify-end gap-2 py-2">
-                      <app-add-to-watchlist [instrument]="item" />
-                    <button type="button" class="rounded bg-blue-700 px-2 py-1 text-sm text-white" (click)="createAlert(item)">Create alert<span class="sr-only"> for {{ item.symbol }}</span></button>
-                    </td>
-                  }
-                </tr>
-              }
-            </tbody>
-          </table>
+          <ul class="grid gap-4 [grid-template-columns:repeat(auto-fill,minmax(15rem,1fr))]">
+            @for (item of page.items; track item.id) {
+              <li>
+                <app-instrument-card [instrument]="item" [signedIn]="auth.isAuthenticated()" (createAlert)="createAlert($event)" />
+              </li>
+            }
+          </ul>
           <app-pager [page]="page.page" [totalPages]="pages()" (pageChange)="goToPage($event)" />
         }
       } @else {
@@ -122,6 +87,17 @@ export class InstrumentsListPage {
   }));
   protected readonly pages = computed(() => (this.instruments.hasValue() ? totalPages(this.instruments.value()) : 1));
 
+  private readonly now = signal(Date.now());
+  protected readonly updatedText = computed(() => {
+    const times = this.instruments.hasValue()
+      ? this.instruments.value().items.flatMap((i) => (i.latestQuote ? [i.latestQuote.updatedAt] : []))
+      : [];
+    if (times.length === 0) {
+      return '—';
+    }
+    return relativeTime(times.reduce((a, b) => (a > b ? a : b)), this.now());
+  });
+
   private searchTimer: ReturnType<typeof setTimeout> | undefined;
 
   // Follows the URL, except while a debounced search is still pending, so a navigation for an
@@ -132,7 +108,11 @@ export class InstrumentsListPage {
   });
 
   constructor() {
-    pollWhileVisible(() => this.instruments.reload());
+    pollWhileVisible(() => {
+      this.now.set(Date.now());
+      this.instruments.reload();
+    });
+    pollWhileVisible(() => this.now.set(Date.now()), 5_000);
     inject(DestroyRef).onDestroy(() => clearTimeout(this.searchTimer));
   }
 
@@ -143,6 +123,12 @@ export class InstrumentsListPage {
       this.searchTimer = undefined;
       this.navigate({ search: value || null, page: null });
     }, 300);
+  }
+
+  protected chipClass(pressed: boolean): string {
+    return pressed
+      ? 'rounded-pill bg-brand px-3 py-1 text-sm font-semibold text-brand-ink'
+      : 'rounded-pill bg-surface px-3 py-1 text-sm text-ink shadow-card';
   }
 
   protected setAssetClass(value: AssetClass | null): void {

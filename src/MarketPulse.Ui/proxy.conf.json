@@ -2,6 +2,13 @@
   "/api": {
     "target": "https://localhost:7274",
     "secure": false,
-    "changeOrigin": false
+    "changeOrigin": false,
+    "xfwd": true
+  },
+  "/signin-google": {
+    "target": "https://localhost:7274",
+    "secure": false,
+    "changeOrigin": false,
+    "xfwd": true
   }
 }

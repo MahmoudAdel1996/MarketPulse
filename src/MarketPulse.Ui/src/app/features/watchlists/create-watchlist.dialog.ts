@@ -14,7 +14,7 @@ import { FormAlert } from '../../shared/ui/form-alert';
   imports: [FormField, FieldErrors, FormAlert],
   template: `
     <form
-      class="w-96 max-w-full rounded-lg bg-white p-6 shadow-xl"
+      class="w-96 max-w-full rounded-panel bg-surface p-6 text-ink shadow-pop"
       novalidate
       aria-labelledby="create-watchlist-title"
       (submit)="onSubmit($event)"
@@ -24,15 +24,15 @@ import { FormAlert } from '../../shared/ui/form-alert';
       <label for="watchlist-name" class="mt-4 block text-sm font-medium">Name</label>
       <input
         id="watchlist-name"
-        class="mt-1 w-full rounded border px-3 py-2"
+        class="mt-1 w-full rounded-card border border-line bg-surface px-3 py-2 text-ink"
         [formField]="f.name"
         aria-describedby="watchlist-name-errors"
         [attr.aria-invalid]="f.name().touched() && f.name().invalid()"
       />
       <app-field-errors [field]="f.name" id="watchlist-name-errors" />
       <div class="mt-6 flex justify-end gap-2">
-        <button type="button" class="rounded border px-3 py-1" (click)="ref.close()">Cancel</button>
-        <button type="submit" class="rounded bg-blue-700 px-3 py-1 text-white disabled:opacity-60" [disabled]="f().submitting()">
+        <button type="button" class="rounded-pill border border-line px-3 py-1 text-ink" (click)="ref.close()">Cancel</button>
+        <button type="submit" class="rounded-pill bg-brand px-3 py-1 text-brand-ink disabled:opacity-60" [disabled]="f().submitting()">
           Create
         </button>
       </div>
